@@ -1,0 +1,227 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BEEC2A65-440B-46A1-9D9E-C2D24ADE99B7}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>DurakGame</RootNamespace>
+    <AssemblyName>DurakGame</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AIRules\AIRules.cs" />
+    <Compile Include="AIRules\VerifyBotState.cs" />
+    <Compile Include="GUI\BorderPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="GUI\CardPlayer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\CardPlayer.Designer.cs">
+      <DependentUpon>CardPlayer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Game.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Game.Designer.cs">
+      <DependentUpon>Game.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Main.Designer.cs">
+      <DependentUpon>Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Lobby.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Lobby.Designer.cs">
+      <DependentUpon>Lobby.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Lobby.Multiple.cs">
+      <DependentUpon>Lobby.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Lobby.Single.cs">
+      <DependentUpon>Lobby.cs</DependentUpon>
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\MultiplayerMode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\MultiplayerMode.Designer.cs">
+      <DependentUpon>MultiplayerMode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Browser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Browser.Designer.cs">
+      <DependentUpon>Browser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GUI\Settings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\Settings.Designer.cs">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GraphicsExtensions.cs" />
+    <Compile Include="Names.cs" />
+    <Compile Include="GUI\PlayerView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GUI\PlayerView.Designer.cs">
+      <DependentUpon>PlayerView.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Prompt.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Rules\CardPlayed.cs" />
+    <Compile Include="Rules\HostReqCardState.cs" />
+    <Compile Include="Rules\Init\InitCardsRule.cs" />
+    <Compile Include="Rules\Init\InitRoundStates.cs" />
+    <Compile Include="Rules\MoveVerify\AttackingRule.cs" />
+    <Compile Include="Rules\MoveVerify\DefendingRule.cs" />
+    <Compile Include="Rules\MoveVerify\ThowingRule.cs" />
+    <Compile Include="Rules\MoveVerify\VerifyCardInHand.cs" />
+    <Compile Include="Rules\MoveVerify\VerifyCardsOnTable.cs" />
+    <Compile Include="Rules\MoveVerify\VerifyTurnRule.cs" />
+    <Compile Include="Rules\StateVerify\AttackerLose.cs" />
+    <Compile Include="Rules\StateVerify\DefenderLose.cs" />
+    <Compile Include="Rules\StateVerify\VerifyBattleWin.cs" />
+    <Compile Include="Rules\Utils.cs" />
+    <Compile Include="GUI\SplashScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GUI\SplashScreen.Designer.cs">
+      <DependentUpon>SplashScreen.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="GUI\Game.resx">
+      <DependentUpon>Game.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Main.resx">
+      <DependentUpon>Main.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Lobby.resx">
+      <DependentUpon>Lobby.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Browser.resx">
+      <DependentUpon>Browser.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\MultiplayerMode.resx">
+      <DependentUpon>MultiplayerMode.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\Settings.resx">
+      <DependentUpon>Settings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\PlayerView.resx">
+      <DependentUpon>PlayerView.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GUI\SplashScreen.resx">
+      <DependentUpon>SplashScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="packages.config" />
+    <None Include="Properties\DataSources\DurakGame.datasource" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\DurakLibrary\DurakLibrary.csproj">
+      <Project>{fce08b63-ce83-4ca9-b7ba-0e339c7f97e4}</Project>
+      <Name>DurakLibrary</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Sandbox\backAttacker.png" />
+    <None Include="Sandbox\backDefender.png" />
+    <None Include="Sandbox\backThrower.png" />
+    <None Include="Sandbox\back.png" />
+    <None Include="Sandbox\bot.png" />
+    <Content Include="Sandbox\delete.png" />
+    <None Include="Sandbox\muted.png" />
+    <None Include="Sandbox\statusDigress.png" />
+    <None Include="Sandbox\statusAttacker.png" />
+    <None Include="Sandbox\statusBot.png" />
+    <None Include="Sandbox\statusDefender.png" />
+    <None Include="Sandbox\statusLeave.png" />
+    <None Include="Sandbox\statusThrower.png" />
+    <None Include="Sandbox\Filka.ico" />
+    <Content Include="Sandbox\mute.png" />
+    <Content Include="Sandbox\digress.png" />
+    <Content Include="Sandbox\microOff.png" />
+    <Content Include="Sandbox\microOn.png" />
+    <Content Include="Sandbox\netIcon.png" />
+    <Content Include="Sandbox\notReady.png" />
+    <Content Include="Sandbox\ready.png" />
+    <Content Include="Sandbox\silhoutte.png" />
+    <None Include="Sandbox\SplashScreen.png" />
+    <Content Include="Sandbox\unmute.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
