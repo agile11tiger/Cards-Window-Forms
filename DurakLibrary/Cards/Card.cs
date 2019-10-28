@@ -8,7 +8,7 @@ namespace DurakLibrary.Cards
         public CardSuit Suit { get; set; }
         public CardValue Value { get; set; }
         public int CardValue { get; set; }
-        public int? AlternateValue { get; set; } = null;
+        public int? AlternateValue { get; set; }
         public bool FaceUp { get; set; }
 
         public Card() : this(Cards.CardValue.Ace, CardSuit.Hearts)
@@ -16,7 +16,7 @@ namespace DurakLibrary.Cards
 
         }
 
-        public Card(CardValue value = Cards.CardValue.Ace, CardSuit suit = CardSuit.Hearts)
+        public Card(CardValue value, CardSuit suit)
         {
             Value = value;
             Suit = suit;

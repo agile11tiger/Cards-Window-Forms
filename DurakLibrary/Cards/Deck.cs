@@ -8,24 +8,8 @@ namespace DurakLibrary.Cards
     public class Deck
     {
         public event LastCardDrawnHandler LastCardDrawn;
-        public readonly CardSuit TrumpSuit;
         public readonly CardCollection Cards = new CardCollection();
-        
-        public Card Draw()
-        {
-            if (Cards.Count == 0) return null;
-            else
-            {
-                var card = Cards.Last();
-                card.FaceUp = true;
-                Cards.Remove(card);
-
-                if (Cards.Count == 0 && LastCardDrawn != null)
-                    LastCardDrawn(this);
-                
-                return card;
-            }
-        }
+        public static bool IsTrump(Card card) => trumpSuit == card.Suit;
 
         public Deck(CardCollection newCards)
         {
@@ -39,11 +23,29 @@ namespace DurakLibrary.Cards
                     Cards.Add(new Card((CardValue)value, (CardSuit)suit));
 
             Shuffle();
-            TrumpSuit = Cards.Last().Suit;
-            CardsComparerHelper.TrumpSuit = TrumpSuit;
+            trumpSuit = Cards.Last().Suit;
         }
         
-        public void Shuffle()
+        public Card Draw()
+        {
+            if (Cards.Count == 0)
+                return null;
+            else
+            {
+                var card = Cards.Last();
+                card.FaceUp = true;
+                Cards.RemoveAt(Cards.Count - 1);
+
+                if (Cards.Count == 0 && LastCardDrawn != null)
+                    LastCardDrawn(this);
+
+                return card;
+            }
+        }
+        
+        private static CardSuit trumpSuit = CardSuit.Spades;
+
+        private void Shuffle()
         {
             var shuffledcards = Cards.OrderBy(card => Guid.NewGuid()).ToList();
             Cards.Clear();
