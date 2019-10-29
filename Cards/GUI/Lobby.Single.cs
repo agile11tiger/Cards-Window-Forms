@@ -8,8 +8,6 @@ namespace DurakGame
 {
     partial class Lobby
     {
-        private SingleClientServer singleServer;
-
         public void InitSinglePlayer()
         {
             var player = new Player(Properties.Settings.Default.UserName, START_ID, true) { IPAddress = NetUtils.GetAddress() };
@@ -29,9 +27,11 @@ namespace DurakGame
             AddPlayer(player);
         }
 
+        private SingleClientServer singleServer;
+
         private void btnAddBot_Click(object sender, EventArgs e)
         {
-            singleServer?.AddBot((Properties.Settings.Default.DefaultBotDifficulty), txtBotName.Text);
+            singleServer?.AddBot(Properties.Settings.Default.DefaultBotDifficulty, txtBotName.Text);
         }
 
         private void StartSingleMode()

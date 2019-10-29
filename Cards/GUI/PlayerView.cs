@@ -9,10 +9,10 @@ namespace DurakGame
 {
     public partial class PlayerView : UserControl
     {
-        private Player player;
-        private SingleClientServer singleClient;
-        private LobbyClient multiClient;
-        private bool hasControl;
+        public PlayerView()
+        {
+            InitializeComponent();
+        }
 
         public bool HasControl
         {
@@ -90,20 +90,6 @@ namespace DurakGame
             }
         }
 
-        public PlayerView()
-        {
-            InitializeComponent();
-        }
-
-        private void ReadyClicked(object sender, EventArgs e)
-        {
-            if (singleClient != null && player.IsBot && singleClient.Player.IsHost)
-                singleClient.RemoveBot(player);
-
-            if (multiClient != null && HasControl && !Player.IsHost)
-                multiClient.ReadyClicked(!player.IsReady);
-        }
-
         public void SetReadiness(bool isReady)
         {
             player.IsReady = isReady;
@@ -114,6 +100,28 @@ namespace DurakGame
                 imgReady.Image = Resources.notReady;
         }
 
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            base.OnMouseClick(e);
+
+            if (e.Button == MouseButtons.Right)
+                cmsContextMenu.Show(this, e.Location, ToolStripDropDownDirection.Default);
+        }
+
+        private Player player;
+        private SingleClientServer singleClient;
+        private LobbyClient multiClient;
+        private bool hasControl;
+
+        private void ReadyClicked(object sender, EventArgs e)
+        {
+            if (singleClient != null && player.IsBot && singleClient.Player.IsHost)
+                singleClient.RemoveBot(player);
+
+            if (multiClient != null && HasControl && !Player.IsHost)
+                multiClient.ReadyClicked(!player.IsReady);
+        }
+
         private void DetermineReadyImage()
         {
             if (singleClient != null && Player.IsBot)
@@ -122,14 +130,6 @@ namespace DurakGame
                 imgReady.Image = IsReady ? Resources.ready : Resources.notReady;
             else
                 imgReady.Image = null;
-        }
-
-        protected override void OnMouseClick(MouseEventArgs e)
-        {
-            base.OnMouseClick(e);
-
-            if (e.Button == MouseButtons.Right)
-                cmsContextMenu.Show(this, e.Location, ToolStripDropDownDirection.Default);
         }
 
         private void KickPlayerPressed(object sender, EventArgs e)

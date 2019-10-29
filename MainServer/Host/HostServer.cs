@@ -5,16 +5,10 @@ using System.Net.Sockets;
 
 namespace MainServer
 {
-    public class HostServer
+    internal class HostServer
     {
-        private TcpClient host;
-        private readonly int hostPort;
-        private readonly string hostID;
-        private NetworkStream hostStream;
-        private MainHostServer mainHostServer;
-        protected internal BinaryReader HostReader { get; private set; }
-        protected internal BinaryWriter HostWriter { get; private set; }
-        protected internal bool IsVisible { get; private set; } = true;
+        public BinaryWriter HostWriter { get; private set; }
+        public bool IsVisible { get; private set; } = true;
 
         public HostServer(TcpClient tcpClient, int port, MainHostServer mainHostServer)
         {
@@ -25,10 +19,10 @@ namespace MainServer
             mainHostServer.AddConnectionHost(hostID, port, this);
         }
 
-        protected internal void HandlingMessagesHost()
+        public void HandlingMessagesHost()
         {
             hostStream = host.GetStream();
-            HostReader = new BinaryReader(hostStream);
+            hostReader = new BinaryReader(hostStream);
             HostWriter = new BinaryWriter(hostStream);
 
             HostWriter.Write((byte)NetMessageType.PlayingPort);
@@ -39,7 +33,7 @@ namespace MainServer
             {
                 try
                 {
-                    var netMessageType = (NetMessageType)HostReader.ReadByte();
+                    var netMessageType = (NetMessageType)hostReader.ReadByte();
 
                     switch (netMessageType)
                     {
@@ -47,7 +41,7 @@ namespace MainServer
                             ReadAndSendDataHost();
                             break;
                         case NetMessageType.HostVisibility:
-                            IsVisible = HostReader.ReadBoolean();
+                            IsVisible = hostReader.ReadBoolean();
                             break;
 
                     }
@@ -61,17 +55,24 @@ namespace MainServer
             }
         }
 
-        protected internal void CloseHost()
+        public void CloseHost()
         {
             mainHostServer.RemoveConnectionHost(hostID, hostPort);
             hostStream?.Close();
             host?.Close();
         }
 
+        private TcpClient host;
+        private readonly int hostPort;
+        private readonly string hostID;
+        private NetworkStream hostStream;
+        private MainHostServer mainHostServer;
+        private BinaryReader hostReader;
+
         private void ReadAndSendDataHost()
         {
             var serverTag = new ServerTag();
-            serverTag.ReadFromPacket(HostReader);
+            serverTag.ReadFromPacket(hostReader);
             MainClientServer.SendDataAboutHost(serverTag);
         }
     }

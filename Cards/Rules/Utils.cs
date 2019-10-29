@@ -72,31 +72,6 @@ namespace DurakGame.Rules
             }
         }
 
-        private static void DealCards(GameState state, Dictionary<int, Player> players, List<int> winningPlayers, Deck deck)
-        {
-            var block = !state.GetValueBool(Names.TRUMP_CARD_USED);
-
-            while (block && !players.Values.All(p => p.Hand.Count >= 6))
-            {
-                foreach (var player in players.Values)
-                {
-                    if (deck.Cards.Count > 0 && player.Hand.Count < 6)
-                        player.Hand.Add(deck.Draw());
-                    else if (block && deck.Cards.Count <= 0 && player.Hand.Count < 6)
-                    {
-                        player.Hand.Add(state.GetValueCard(Names.TRUMP_CARD));
-                        state.Set(Names.TRUMP_CARD_USED, true);
-                        block = false;
-                        break;
-                    }
-                }
-            }
-
-            foreach (var player in players.Values)
-                if (player.Hand.Count == 0 && !winningPlayers.Contains(player.ID))
-                    winningPlayers.Add(player.ID);
-        }
-
         public static int FindIDAttackingOrDefending(Dictionary<int, Player> players, int supportedPlayerCount, int id)
         {
             for (var iterations = 0; iterations < supportedPlayerCount; id++, iterations++)
@@ -132,6 +107,31 @@ namespace DurakGame.Rules
             }
 
             return players.Keys.OrderBy(id => id).Last();
+        }
+
+        private static void DealCards(GameState state, Dictionary<int, Player> players, List<int> winningPlayers, Deck deck)
+        {
+            var block = !state.GetValueBool(Names.TRUMP_CARD_USED);
+
+            while (block && !players.Values.All(p => p.Hand.Count >= 6))
+            {
+                foreach (var player in players.Values)
+                {
+                    if (deck.Cards.Count > 0 && player.Hand.Count < 6)
+                        player.Hand.Add(deck.Draw());
+                    else if (block && deck.Cards.Count <= 0 && player.Hand.Count < 6)
+                    {
+                        player.Hand.Add(state.GetValueCard(Names.TRUMP_CARD));
+                        state.Set(Names.TRUMP_CARD_USED, true);
+                        block = false;
+                        break;
+                    }
+                }
+            }
+
+            foreach (var player in players.Values)
+                if (player.Hand.Count == 0 && !winningPlayers.Contains(player.ID))
+                    winningPlayers.Add(player.ID);
         }
     }
 }

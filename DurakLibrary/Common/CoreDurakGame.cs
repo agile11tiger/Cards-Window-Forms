@@ -9,7 +9,6 @@ namespace DurakLibrary.Common
 {
     public class CoreDurakGame
     {
-        private Timer timer;
         public readonly string[] BotNames;
 
         public ServerTag ConnectedServer { get; set; }
@@ -40,16 +39,6 @@ namespace DurakLibrary.Common
         {
             timer.Change(Timeout.Infinite, Timeout.Infinite);
             timer.Dispose();
-        }
-
-        private void Tick(object state)
-        {
-            var sync = state as SynchronizationContext;
-
-            if (sync != null)
-                sync.Send(BotTriesMove, null);
-            else
-                BotTriesMove(null);
         }
 
         public void BotTriesMove(object state)
@@ -96,20 +85,6 @@ namespace DurakLibrary.Common
             CheckStateRules();
         }
 
-        private void NotifyInvalidMove(GameMove move, string reason, BinaryWriter writer)
-        {
-            writer.Write((byte)NetMessageType.Data);
-            writer.Write((byte)MessageType.InvalidMove);
-            writer.Write(reason);
-            move.Encode(writer);
-        }
-
-        public void CheckMoveRules(GameMove move)
-        {
-            foreach (var moveRule in Rules.MoveSuccessRules)
-                moveRule.UpdateState(this, move);
-        }
-
         public void CheckStateRules()
         {
             foreach (var stateRule in Rules.StateRules)
@@ -126,6 +101,32 @@ namespace DurakLibrary.Common
                     return false;
 
             return true;
+        }
+
+        private Timer timer;
+
+        private void Tick(object state)
+        {
+            var sync = state as SynchronizationContext;
+
+            if (sync != null)
+                sync.Send(BotTriesMove, null);
+            else
+                BotTriesMove(null);
+        }
+
+        private void CheckMoveRules(GameMove move)
+        {
+            foreach (var moveRule in Rules.MoveSuccessRules)
+                moveRule.UpdateState(this, move);
+        }
+
+        private void NotifyInvalidMove(GameMove move, string reason, BinaryWriter writer)
+        {
+            writer.Write((byte)NetMessageType.Data);
+            writer.Write((byte)MessageType.InvalidMove);
+            writer.Write(reason);
+            move.Encode(writer);
         }
     }
 }

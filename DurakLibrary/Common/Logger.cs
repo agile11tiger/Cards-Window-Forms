@@ -7,7 +7,6 @@ namespace DurakLibrary.Common
 {
     public class Logger : TextWriter
     {
-        private StreamWriter stream;
         public static readonly string LogTimeFormat = "HH:mm:ss";
         public static readonly string LogFileTimeFormat = "yyyy-MM-dd_HH_mm";
         public static Logger Singleton { get; private set; }
@@ -34,12 +33,6 @@ namespace DurakLibrary.Common
             }
         }
 
-        new private void WriteLine(string line)
-        {
-            stream.WriteLine(line);
-            Singleton.stream.Flush();
-        }
-        
         public static void Write(Exception e)
         {
             Write("Encounted {0} at:", e.GetType().Name);
@@ -61,5 +54,13 @@ namespace DurakLibrary.Common
         }
         
         public override Encoding Encoding => Encoding.ASCII;
+
+        private StreamWriter stream;
+
+        new private void WriteLine(string line)
+        {
+            stream.WriteLine(line);
+            Singleton.stream.Flush();
+        }
     }
 }

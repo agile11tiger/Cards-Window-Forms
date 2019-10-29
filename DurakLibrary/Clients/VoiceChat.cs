@@ -13,13 +13,6 @@ namespace DurakLibrary.Clients
     {
         public readonly IPAddress HostIP;
         public readonly int HostPort;
-
-        private bool isConnected;
-        private UdpClient sendingClient;
-        private WaveIn input;
-        private WaveOut output;
-        private BufferedWaveProvider bufferStream;
-        private UdpClient listeningClient;
         public Dictionary<IPAddress, bool> MutedPlayers { get; private set; }
 
         public VoiceChat(IPAddress ip, int port)
@@ -42,6 +35,45 @@ namespace DurakLibrary.Clients
             isConnected = true;
             Task.Factory.StartNew(Listening, TaskCreationOptions.LongRunning);
         }
+
+        public void MicroTurnOnOff(ref bool isActivate)
+        {
+            Thread.Sleep(500); //If you quickly go into this method, the previous command (start or stop recording) does not have time to process.
+
+            try
+            {
+                if (isActivate)
+                    input.StartRecording();
+                else
+                    input.StopRecording();
+            }
+            catch
+            {
+                isActivate = false;
+                MessageBox.Show("You do not have a microphone connected");
+            }
+        }
+
+        public void CloseChat()
+        {
+            isConnected = false;
+            listeningClient?.Close();
+            output?.Dispose();
+            output = null;
+
+            sendingClient?.Close();
+            input?.Dispose();
+            input = null;
+
+            bufferStream = null;
+        }
+
+        private bool isConnected;
+        private UdpClient sendingClient;
+        private WaveIn input;
+        private WaveOut output;
+        private BufferedWaveProvider bufferStream;
+        private UdpClient listeningClient;
 
         private void VoiceInput(object sender, WaveInEventArgs e)
         {
@@ -79,38 +111,6 @@ namespace DurakLibrary.Clients
                 }
                 throw;
             }
-        }
-
-        public void MicroTurnOnOff(ref bool isActivate)
-        {
-            Thread.Sleep(500); //If you quickly go into this method, the previous command (start or stop recording) does not have time to process.
-
-            try
-            {
-                if (isActivate)
-                    input.StartRecording();
-                else
-                    input.StopRecording();
-            }
-            catch (Exception ex)
-            {
-                isActivate = false;
-                MessageBox.Show("You do not have a microphone connected");
-            }
-        }
-
-        public void CloseChat()
-        {
-            isConnected = false;
-            listeningClient?.Close();
-            output?.Dispose();
-            output = null;
-
-            sendingClient?.Close();
-            input?.Dispose();
-            input = null;
-
-            bufferStream = null;
         }
     }
 }

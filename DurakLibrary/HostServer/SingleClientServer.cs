@@ -9,28 +9,15 @@ namespace DurakLibrary.HostServer
 {
     public class SingleClientServer : CoreDurakGame
     {
-        public SingleClientServer(Player player) : base(player)
-        {
-        }
-
-        private Queue<int> playersID;
         public event Action<Player> OnBotAdded;
         public event Action<int> OnBotRemoved;
         public event Action<Player, int, bool> OnAddedCard;
         public event Action<Player, int, bool> OnRemovedCard;
 
-        private void PlayerAddedCard(object sender, Card card)
+        public SingleClientServer(Player player) : base(player)
         {
-            var player = sender as Player;
-            OnAddedCard?.Invoke(player, player.Hand.Count, card != null ? true : false);
         }
 
-        private void PlayerRemovedCard(object sender, Card card)
-        {
-            var player = sender as Player;
-            OnRemovedCard?.Invoke(player, player.Hand.Count, card != null ? true : false);
-        }
-        
         public void CreatePlayersID()
         {
             var shuffleNumbers = Enumerable.Range(1, 5).OrderBy(n => Guid.NewGuid()).ToList();
@@ -97,6 +84,20 @@ namespace DurakLibrary.HostServer
                 GameState.SilentSets = false;
                 IsGameInitialized = true;
             }
+        }
+
+        private Queue<int> playersID;
+
+        private void PlayerAddedCard(object sender, Card card)
+        {
+            var player = sender as Player;
+            OnAddedCard?.Invoke(player, player.Hand.Count, card != null ? true : false);
+        }
+
+        private void PlayerRemovedCard(object sender, Card card)
+        {
+            var player = sender as Player;
+            OnRemovedCard?.Invoke(player, player.Hand.Count, card != null ? true : false);
         }
     }
 }

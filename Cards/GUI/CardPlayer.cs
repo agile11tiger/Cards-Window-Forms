@@ -9,14 +9,12 @@ namespace DurakGame
 {
     public partial class CardPlayer : UserControl
     {
-        private const float CARD_ASPECT_RATIO = 1.466666666666f;
-        private const float EXPAND_SIZE = 16.0f;
-        private float cardWidth;
-        private float cardHeight;
-        private float cardOffsetX;
-        private float cardOffsetY;
-        private int hoverIndex = -1;
-        private Player player;
+        public CardPlayer()
+        {
+            InitializeComponent();
+            DoubleBuffered = true;
+        }
+
         public event EventHandler<CardEventArgs> OnCardSelected;
 
         public Player Player
@@ -34,49 +32,16 @@ namespace DurakGame
             }
         }
 
-        public CardPlayer()
-        {
-            InitializeComponent();
-            DoubleBuffered = true;
-        }
-
         public void UpdatePlayer()
         {
             Invalidate();
             CalculateSize();
         }
 
-        private void OnCardsChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            UpdatePlayer();
-        }
         protected override void OnResize(EventArgs e)
         {
             CalculateSize();
             base.OnResize(e);
-        }
-
-        private void CalculateSize()
-        {
-            if (player != null && player.Hand.Count > 0)
-            {
-                float availableWidth = Width - EXPAND_SIZE;
-                float availableHeight = Height - EXPAND_SIZE;
-                cardWidth = availableWidth / player.Hand.Count;
-                cardHeight = cardWidth * CARD_ASPECT_RATIO;
-
-                if (cardHeight > availableHeight)
-                {
-                    cardHeight = availableHeight;
-                    cardWidth = cardHeight * (1 / CARD_ASPECT_RATIO);
-                }
-
-                cardOffsetX = EXPAND_SIZE / 2 + (availableWidth - (cardWidth * player.Hand.Count)) / 2.0f;
-                cardOffsetY = EXPAND_SIZE / 2 + (availableHeight - cardHeight) / 2.0f;
-
-            }
-            else
-                cardHeight = cardWidth = cardOffsetX = cardOffsetY = 0;
         }
 
         protected override void OnMouseLeave(EventArgs e)
@@ -126,6 +91,43 @@ namespace DurakGame
                 }
             }
             base.OnPaint(e);
+        }
+
+        private const float CARD_ASPECT_RATIO = 1.466666666666f;
+        private const float EXPAND_SIZE = 16.0f;
+        private float cardWidth;
+        private float cardHeight;
+        private float cardOffsetX;
+        private float cardOffsetY;
+        private int hoverIndex = -1;
+        private Player player;
+
+        private void OnCardsChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            UpdatePlayer();
+        }
+
+        private void CalculateSize()
+        {
+            if (player != null && player.Hand.Count > 0)
+            {
+                float availableWidth = Width - EXPAND_SIZE;
+                float availableHeight = Height - EXPAND_SIZE;
+                cardWidth = availableWidth / player.Hand.Count;
+                cardHeight = cardWidth * CARD_ASPECT_RATIO;
+
+                if (cardHeight > availableHeight)
+                {
+                    cardHeight = availableHeight;
+                    cardWidth = cardHeight * (1 / CARD_ASPECT_RATIO);
+                }
+
+                cardOffsetX = EXPAND_SIZE / 2 + (availableWidth - (cardWidth * player.Hand.Count)) / 2.0f;
+                cardOffsetY = EXPAND_SIZE / 2 + (availableHeight - cardHeight) / 2.0f;
+
+            }
+            else
+                cardHeight = cardWidth = cardOffsetX = cardOffsetY = 0;
         }
 
         private RectangleF CalculateCardBounds(int index)

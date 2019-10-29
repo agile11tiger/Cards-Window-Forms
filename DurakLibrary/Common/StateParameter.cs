@@ -26,9 +26,6 @@ namespace DurakLibrary.Common
             { typeof(Dictionary<int, bool>), Type.DictIntBool }
         };
 
-        private string name;
-        private object value;
-        private Type type;
         public string Name { get => name; }
         public object RawValue { get => value; }
         public Type ParameterType { get => type; }
@@ -161,6 +158,70 @@ namespace DurakLibrary.Common
             }
         }
 
+        public void Decode(BinaryReader reader)
+        {
+            name = reader.ReadString();
+            type = (Type)reader.ReadByte();
+            DecodeInternal(reader);
+        }
+
+        public static StateParameter Decode(BinaryReader reader, GameState state)
+        {
+            var name = reader.ReadString();
+            var type = (Type)reader.ReadByte();
+            StateParameter result = null;
+
+            switch (type)
+            {
+                case Type.Byte:
+                    result = state.GetParameter<byte>(name);
+                    break;
+                case Type.Char:
+                    result = state.GetParameter<char>(name);
+                    break;
+                case Type.Short:
+                    result = state.GetParameter<short>(name);
+                    break;
+                case Type.Int:
+                    result = state.GetParameter<int>(name);
+                    break;
+                case Type.Bool:
+                    result = state.GetParameter<bool>(name);
+                    break;
+                case Type.CardSuit:
+                    result = state.GetParameter<CardSuit>(name);
+                    break;
+                case Type.CardValue:
+                    result = state.GetParameter<CardValue>(name);
+                    break;
+                case Type.String:
+                    result = state.GetParameter<String>(name);
+                    break;
+                case Type.Card:
+                    result = state.GetParameter<Card>(name);
+                    break;
+                case Type.CardCollection:
+                    result = state.GetParameter<CardCollection>(name);
+                    break;
+                case Type.ListInt:
+                    result = state.GetParameter<List<int>>(name);
+                    break;
+                case Type.DictIntBool:
+                    result = state.GetParameter<Dictionary<int, bool>>(name);
+                    break;
+            }
+
+            result.DecodeInternal(reader);             
+            state.InvokeUpdated(result);
+            return result;
+        }
+
+        public override string ToString() => value?.ToString();
+
+        private string name;
+        private object value;
+        private Type type;
+
         private void DecodeInternal(BinaryReader clientReader)
         {
             switch (ParameterType)
@@ -234,66 +295,6 @@ namespace DurakLibrary.Common
                     break;
             }
         }
-
-        public void Decode(BinaryReader reader)
-        {
-            name = reader.ReadString();
-            type = (Type)reader.ReadByte();
-            DecodeInternal(reader);
-        }
-
-        public static StateParameter Decode(BinaryReader reader, GameState state)
-        {
-            var name = reader.ReadString();
-            var type = (Type)reader.ReadByte();
-            StateParameter result = null;
-
-            switch (type)
-            {
-                case Type.Byte:
-                    result = state.GetParameter<byte>(name);
-                    break;
-                case Type.Char:
-                    result = state.GetParameter<char>(name);
-                    break;
-                case Type.Short:
-                    result = state.GetParameter<short>(name);
-                    break;
-                case Type.Int:
-                    result = state.GetParameter<int>(name);
-                    break;
-                case Type.Bool:
-                    result = state.GetParameter<bool>(name);
-                    break;
-                case Type.CardSuit:
-                    result = state.GetParameter<CardSuit>(name);
-                    break;
-                case Type.CardValue:
-                    result = state.GetParameter<CardValue>(name);
-                    break;
-                case Type.String:
-                    result = state.GetParameter<String>(name);
-                    break;
-                case Type.Card:
-                    result = state.GetParameter<Card>(name);
-                    break;
-                case Type.CardCollection:
-                    result = state.GetParameter<CardCollection>(name);
-                    break;
-                case Type.ListInt:
-                    result = state.GetParameter<List<int>>(name);
-                    break;
-                case Type.DictIntBool:
-                    result = state.GetParameter<Dictionary<int, bool>>(name);
-                    break;
-            }
-
-            result.DecodeInternal(reader);             
-            state.InvokeUpdated(result);
-            return result;
-        }
-
-        public override string ToString() => value?.ToString();
 
         public enum Type
         {

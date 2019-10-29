@@ -8,7 +8,6 @@ namespace DurakLibrary.Cards
         public CardSuit Suit { get; set; }
         public CardValue Value { get; set; }
         public int CardValue { get; set; }
-        public int? AlternateValue { get; set; }
         public bool FaceUp { get; set; }
 
         public Card() : this(Cards.CardValue.Ace, CardSuit.Hearts)
@@ -37,11 +36,14 @@ namespace DurakLibrary.Cards
                 {
                     if (Suit == CardSuit.Clubs || Suit == CardSuit.Spades)
                         return $"{Value}_Black";
-                    else return $"{Value}_Red"; ;
+                    else 
+                        return $"{Value}_Red"; ;
                 }
-                else return $"{Suit}_{Value}";
+                else 
+                    return $"{Suit}_{Value}";
             }
-            else return "Back";
+            else 
+                return "Back";
         }
         
         public static bool operator ==(Card up, Card down)

@@ -5,14 +5,14 @@ namespace DurakGame
 {
     public partial class Settings : Form
     {
-        private bool changesMade = false;
-
         public Settings()
         {
             InitializeComponent();
             LoadSettingsView();
         }
-        
+
+        private bool changesMade = false;
+
         private void LoadSettingsView()
         {
             txtPlayerName.Text = Properties.Settings.Default.UserName;

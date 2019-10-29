@@ -8,13 +8,28 @@ namespace DurakGame
 {
     public partial class Browser : Form
     {
-        private Timer timer;
-        private BrowserClient browserClient;
-
         public Browser()
         {
             InitializeComponent();
             Initialize();
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            timer.Stop();
+            base.OnClosing(e);
+            browserClient.IsLobbyClosing = true;
+            browserClient.CloseLobby("Disconnected");
+            browserClient.IsBrowserClosing = true;
+            browserClient.CloseBrowser(null);
+        }
+
+        private Timer timer;
+        private BrowserClient browserClient;
+
+        private void Initialize()
+        {
+            InitClient();
         }
 
         private void AddEvents()
@@ -23,11 +38,6 @@ namespace DurakGame
             browserClient.OnConnected += CreateLobby;
             browserClient.OnBrowserClose += Close;
             dgvServers.MouseDoubleClick += ServerListDoubleClicked;
-        }
-
-        public void Initialize()
-        {
-            InitClient();
         }
 
         private void InitClient()
@@ -57,11 +67,10 @@ namespace DurakGame
                 if (dataRow != null)
                 {
                     var tag = (ServerTag)dataRow.Tag;
-                    var password = "";
 
                     if (tag.PasswordProtected)
                     {
-                        password = Prompt.ShowDialog("Enter password", "Enter Password");
+                        var password = Prompt.ShowDialog("Enter password", "Enter Password");
 
                         if (tag.Password == password)
                             browserClient.ConnectTo(tag);
@@ -109,16 +118,6 @@ namespace DurakGame
         private void btnBack_Click(object sender, EventArgs e)
         {
             Close();
-        }
-        
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            timer.Stop();
-            base.OnClosing(e);
-            browserClient.IsLobbyClosing = true;
-            browserClient.CloseLobby("Disconnected");
-            browserClient.IsBrowserClosing = true;
-            browserClient.CloseBrowser(null);
         }
     }
 }

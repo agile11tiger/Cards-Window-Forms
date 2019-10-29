@@ -17,16 +17,6 @@ namespace DurakLibrary.HostServer
         public static ConcurrentDictionary<int, PlayerServer> PlayerServers { get; private set; }
         public static PlayerServer Host { get; private set; }
         public readonly int MaxPlayers;
-        
-        private TcpClient serverTcp;
-        private Stream serverStreamReader;
-        private Stream serverStreamWriter;
-        private BinaryReader serverReader;
-        private BinaryWriter serverWriter;
-        private TcpListener tcpListenerPlayers;
-
-        private Queue<int> playersID;
-        private bool IsHostVisible = true;
         public int Port { get; private set; }
         public List<int> LeavingPlayers { get; private set; }
 
@@ -57,12 +47,6 @@ namespace DurakLibrary.HostServer
             Task.Run(GettingPlayers);
         }
 
-        private void CreatePlayersID()
-        {
-            var shuffleNumbers = Enumerable.Range(0, MaxPlayers).OrderBy(n => Guid.NewGuid()).ToList();
-            playersID = new Queue<int>(shuffleNumbers);
-        }
-
         public void AddPlayer(int id, PlayerServer playerServer)
         {
             PlayerServers.TryAdd(id, playerServer);
@@ -85,19 +69,40 @@ namespace DurakLibrary.HostServer
             BroadcastRemovePlayer(id, PlayerServers[id]);
         }
 
-        private void BroadcastRemovePlayer(int id, PlayerServer server)
+        public void SendHostVisibility()
         {
-            var isLeave = true;
-            var isBot = true;
-
-            server.KickPlayerThisPlayerServer();
-            RemovePlayer(id);
-
-            foreach (var player in PlayerServers.Values)
-                player.ReportPlayerDisconnected(id, isLeave, isBot);
+            IsHostVisible = !IsHostVisible;
+            serverWriter.Write((byte)NetMessageType.HostVisibility);
+            serverWriter.Write(IsHostVisible);
         }
 
-        public void GettingPlayers()
+        public void DisconnectPlayers()
+        {
+            tcpListenerPlayers.Stop();
+
+            foreach (var player in PlayerServers?.Values)
+                player.ClosePlayer();
+
+            serverStreamReader.Close();
+            serverTcp.Close();
+        }
+
+        private TcpClient serverTcp;
+        private Stream serverStreamReader;
+        private Stream serverStreamWriter;
+        private BinaryReader serverReader;
+        private BinaryWriter serverWriter;
+        private TcpListener tcpListenerPlayers;
+        private Queue<int> playersID;
+        private bool IsHostVisible = true;
+
+        private void CreatePlayersID()
+        {
+            var shuffleNumbers = Enumerable.Range(0, MaxPlayers).OrderBy(n => Guid.NewGuid()).ToList();
+            playersID = new Queue<int>(shuffleNumbers);
+        }
+
+        private void GettingPlayers()
         {
             try
             {
@@ -132,10 +137,10 @@ namespace DurakLibrary.HostServer
             }
         }
 
-        public void HandlingMessagesMainServer()
+        private void HandlingMessagesMainServer()
         {
             serverStreamReader = serverTcp.GetStream();
-            serverStreamWriter = Stream.Synchronized(serverTcp.GetStream()); 
+            serverStreamWriter = Stream.Synchronized(serverTcp.GetStream());
             serverReader = new BinaryReader(serverStreamReader);
             serverWriter = new BinaryWriter(serverStreamWriter);
             var block = true;
@@ -166,29 +171,23 @@ namespace DurakLibrary.HostServer
             }
         }
 
-        public void DisconnectPlayers()
-        {
-            tcpListenerPlayers.Stop();
-
-            foreach (var player in PlayerServers?.Values)
-                player.ClosePlayer();
-
-            serverStreamReader.Close();
-            serverTcp.Close();
-        }
-
-        public void SendDataAboutHost()
+        private void SendDataAboutHost()
         {
             var senderID = serverReader.ReadString();
             serverWriter.Write((byte)NetMessageType.DataHosts);
             Host.Core.ConnectedServer.WriteToPacket(serverWriter, senderID);
         }
 
-        public void SendHostVisibility()
+        private void BroadcastRemovePlayer(int id, PlayerServer server)
         {
-            IsHostVisible = !IsHostVisible;
-            serverWriter.Write((byte)NetMessageType.HostVisibility);
-            serverWriter.Write(IsHostVisible);
+            var isLeave = true;
+            var isBot = true;
+
+            server.KickPlayerThisPlayerServer();
+            RemovePlayer(id);
+
+            foreach (var player in PlayerServers.Values)
+                player.ReportPlayerDisconnected(id, isLeave, isBot);
         }
     }
 }

@@ -30,15 +30,9 @@ namespace DurakLibrary.Clients
         public event Action OnReturnToLobby;
         public event Action OnGameClose;
 
-        private Dictionary<MessageType, Action> messageHandlers;
         public bool IsGameClosing { get; set; }
         public bool IsLobbyClosing { get; set; }
         public VoiceChat Chat { get; set; }
-
-        private TcpClient lobbyTcp;
-        private NetworkStream lobbyStream;
-        private BinaryReader lobbyReader;
-        private BinaryWriter lobbyWriter;
 
         public LobbyClient(Player player) : base(player)
         {
@@ -60,6 +54,19 @@ namespace DurakLibrary.Clients
             };
         }
 
+        public void SetLobbyTcp(IPAddress ip, int port)
+        {
+            lobbyTcp = new TcpClient();
+            lobbyTcp.Connect(ip, port);
+            RunLobbyClient();
+        }
+
+        public void ConnectHost()
+        {
+            lobbyWriter.Write((byte)NetMessageType.ConnectionApproval);
+            ConnectedServer.WriteDataPlayer(lobbyWriter, PlayerUntill);
+        }
+
         public void ConnectTo(ServerTag host)
         {
             if (ConnectedServer == null)
@@ -74,7 +81,7 @@ namespace DurakLibrary.Clients
                     lobbyWriter.Write((byte)NetMessageType.ConnectionApproval);
                     ConnectedServer.WriteDataPlayer(lobbyWriter, PlayerUntill);
                 }
-                catch (Exception ex)
+                catch
                 {
                     ConnectedServer = null;
                     MessageBox.Show("You cannot connect to this host");
@@ -103,6 +110,108 @@ namespace DurakLibrary.Clients
                 counter++;
             }
         }
+
+        public void PrepareToReturnToLobby()
+        {
+            IsGameInitialized = false;
+            GameState.Clear();
+            ConnectedServer.Players[Player.ID].Hand.Clear();
+
+            OnReturnToLobby.Invoke();
+            IsGameClosing = false;
+        }
+
+        public void CloseLobby(object reason)
+        {
+            if (!IsGameClosing)
+                OnGameClose?.Invoke();
+
+            if (!IsLobbyClosing)
+                OnLobbyClose?.Invoke((string)reason);
+
+            Chat?.CloseChat();
+            lobbyStream?.Close();
+            lobbyTcp?.Close();
+        }
+
+        #region Message Writers
+        public void RequestKick(Player player)
+        {
+            if (Player.IsHost)
+            {
+                lobbyWriter.Write((byte)NetMessageType.RequestRemovePlayer);
+                lobbyWriter.Write(player.ID);
+            }
+        }
+
+        public void ReadyClicked(bool isReady)
+        {
+            lobbyWriter.Write((byte)NetMessageType.Data);
+            lobbyWriter.Write((byte)MessageType.PlayerIsReady);
+            lobbyWriter.Write(isReady);
+        }
+
+        public void SendChatMessage(string message)
+        {
+            if (message.Length > 30)
+                message = message.Remove(30);
+
+            lobbyWriter.Write((byte)NetMessageType.Data);
+            lobbyWriter.Write((byte)MessageType.PlayerChat);
+            lobbyWriter.Write(message);
+        }
+
+        public void RequestState(StateParameter parameter)
+        {
+            if (Player.IsHost)
+            {
+                lobbyWriter.Write((byte)NetMessageType.Data);
+                lobbyWriter.Write((byte)MessageType.RequestState);
+                parameter.Encode(lobbyWriter);
+            }
+        }
+
+        public void RequestStart()
+        {
+            if (Player.IsHost)
+            {
+                lobbyWriter.Write((byte)NetMessageType.Data);
+                lobbyWriter.Write((byte)MessageType.HostReqStart);
+                lobbyWriter.Write(true);
+            }
+        }
+
+        public void RequestMove(Card card)
+        {
+            var move = new GameMove(Player, card);
+            lobbyWriter.Write((byte)NetMessageType.Data);
+            lobbyWriter.Write((byte)MessageType.SendMove);
+            move.Encode(lobbyWriter);
+        }
+
+        public void RequestServerState(ServerState state)
+        {
+            if (Player.IsHost)
+            {
+                lobbyWriter.Write((byte)NetMessageType.ServerStateChanged);
+                lobbyWriter.Write((byte)state);
+            }
+        }
+
+        public void RequestDigress(bool isDigress, bool isBot)
+        {
+            lobbyWriter.Write((byte)NetMessageType.Data);
+            lobbyWriter.Write((byte)MessageType.PlayerDigressed);
+            lobbyWriter.Write(isDigress);
+            lobbyWriter.Write(isBot);
+        }
+        #endregion
+
+        private Dictionary<MessageType, Action> messageHandlers;
+        private TcpClient lobbyTcp;
+        private NetworkStream lobbyStream;
+        private BinaryReader lobbyReader;
+        private BinaryWriter lobbyWriter;
 
         private async void RunLobbyClient()
         {
@@ -146,36 +255,11 @@ namespace DurakLibrary.Clients
                     block = false;
                     guiContext.Send(CloseLobby, null);
 
+                    //(-2146232800) Cannot read data from transport connection. The remote host forcibly terminated the existing connection.
                     if (!(ex is EndOfStreamException || ex is ObjectDisposedException || ex.HResult == -2146232800))
                         MessageBox.Show($"Exception in LobbyClient!\n {ex.Message}\n StackTrace:{ex.StackTrace}");
                 }
             }
-        }
-
-        public void CloseLobby(object reason)
-        {
-            if (!IsGameClosing)
-                OnGameClose?.Invoke();
-
-            if (!IsLobbyClosing)
-                OnLobbyClose?.Invoke((string)reason);
-
-            Chat?.CloseChat();
-            lobbyStream?.Close();
-            lobbyTcp?.Close();
-        }
-
-        public void SetLobbyTcp(IPAddress ip, int port)
-        {
-            lobbyTcp = new TcpClient();
-            lobbyTcp.Connect(ip, port);
-            RunLobbyClient();
-        }
-
-        public void ConnectHost()
-        {
-            lobbyWriter.Write((byte)NetMessageType.ConnectionApproval);
-            ConnectedServer.WriteDataPlayer(lobbyWriter, PlayerUntill);
         }
 
         #region Message Handlers
@@ -322,89 +406,6 @@ namespace DurakLibrary.Clients
                 ConnectedServer.RemovePlayer(playerID);
                 OnPlayerDisconnectedLobby.Invoke(playerID);
             }
-        }
-
-        public void PrepareToReturnToLobby()
-        {
-            IsGameInitialized = false;
-            GameState.Clear();
-            ConnectedServer.Players[Player.ID].Hand.Clear();
-
-            OnReturnToLobby.Invoke();
-            IsGameClosing = false;
-        }
-        #endregion
-
-        #region Message Writers
-        public void RequestKick(Player player)
-        {
-            if (Player.IsHost)
-            {
-                lobbyWriter.Write((byte)NetMessageType.RequestRemovePlayer);
-                lobbyWriter.Write(player.ID);
-            }
-        }
-
-        public void ReadyClicked(bool isReady)
-        {
-            lobbyWriter.Write((byte)NetMessageType.Data);
-            lobbyWriter.Write((byte)MessageType.PlayerIsReady);
-            lobbyWriter.Write(isReady);
-        }
-
-        public void SendChatMessage(string message)
-        {
-            if (message.Length > 30)
-                message = message.Remove(30);
-
-            lobbyWriter.Write((byte)NetMessageType.Data);
-            lobbyWriter.Write((byte)MessageType.PlayerChat);
-            lobbyWriter.Write(message);
-        }
-
-        public void RequestState(StateParameter parameter)
-        {
-            if (Player.IsHost)
-            {
-                lobbyWriter.Write((byte)NetMessageType.Data);
-                lobbyWriter.Write((byte)MessageType.RequestState);
-                parameter.Encode(lobbyWriter);
-            }
-        }
-
-        public void RequestStart()
-        {
-            if (Player.IsHost)
-            {
-                lobbyWriter.Write((byte)NetMessageType.Data);
-                lobbyWriter.Write((byte)MessageType.HostReqStart);
-                lobbyWriter.Write(true);
-            }
-        }
-
-        public void RequestMove(Card card)
-        {
-            var move = new GameMove(Player, card);
-            lobbyWriter.Write((byte)NetMessageType.Data);
-            lobbyWriter.Write((byte)MessageType.SendMove);
-            move.Encode(lobbyWriter);
-        }
-
-        public void RequestServerState(ServerState state)
-        {
-            if (Player.IsHost)
-            {
-                lobbyWriter.Write((byte)NetMessageType.ServerStateChanged);
-                lobbyWriter.Write((byte)state);
-            }
-        }
-
-        public void RequestDigress(bool isDigress, bool isBot)
-        {
-            lobbyWriter.Write((byte)NetMessageType.Data);
-            lobbyWriter.Write((byte)MessageType.PlayerDigressed);
-            lobbyWriter.Write(isDigress);
-            lobbyWriter.Write(isBot);
         }
         #endregion
     }

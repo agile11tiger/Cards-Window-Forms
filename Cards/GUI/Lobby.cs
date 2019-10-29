@@ -9,9 +9,6 @@ namespace DurakGame
 {
     public partial class Lobby : Form
     {
-        private const int START_ID = 0;
-        private List<PlayerView> views;
-
         public Lobby()
         {
             InitializeComponent();
@@ -19,6 +16,9 @@ namespace DurakGame
             DialogResult = DialogResult.OK;
             chkSimulateBotThinkTime.Checked = Properties.Settings.Default.DefaultBotsThink;
         }
+
+        private const int START_ID = 0;
+        private List<PlayerView> views;
 
         private void RemovePlayer(int id)
         {

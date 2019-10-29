@@ -8,32 +8,8 @@ using System.Threading.Tasks;
 
 namespace MainServer
 {
-    public class MainHostServer
+    internal class MainHostServer
     {
-        private static ConcurrentDictionary<string, HostServer> hosts = new ConcurrentDictionary<string, HostServer>();
-        private static ConcurrentStack<int> ports = new ConcurrentStack<int>();
-        private static object locker = new object();
-        private TcpListener tcpListenerHosts;
-
-        protected internal void AddConnectionHost(string id, int port, HostServer hostServer)
-        {
-            if (hosts.TryAdd(id, hostServer))
-                Console.WriteLine($"Host-Server is connected: Port = {port}, ID = {id}");
-            else
-                Console.WriteLine($"Host-Server with such ID = {id} and Port = {port} is already connected!");
-        }
-
-        protected internal void RemoveConnectionHost(string id, int port)
-        {
-            if (hosts.TryRemove(id, out _))
-            {
-                ports.Push(port);
-                Console.WriteLine($"Host-Server is deleted: Port = {port}, ID = {id}");
-            }
-            else
-                Console.WriteLine($"Host-Server with such ID = {id} and Port = {port} doesn`t exist!");
-        }
-
         public void GettingHosts()
         {
             CreatePorts();
@@ -62,27 +38,35 @@ namespace MainServer
             }
         }
 
-        private void CreatePorts()
+        public void AddConnectionHost(string id, int port, HostServer hostServer)
         {
-            for (int i = 111; i < 888; i++)
+            if (hosts.TryAdd(id, hostServer))
+                Console.WriteLine($"Host-Server is connected: Port = {port}, ID = {id}");
+            else
+                Console.WriteLine($"Host-Server with such ID = {id} and Port = {port} is already connected!");
+        }
+
+        public void RemoveConnectionHost(string id, int port)
+        {
+            if (hosts.TryRemove(id, out _))
             {
-                ports.Push(i);
+                ports.Push(port);
+                Console.WriteLine($"Host-Server is deleted: Port = {port}, ID = {id}");
+            }
+            else
+                Console.WriteLine($"Host-Server with such ID = {id} and Port = {port} doesn`t exist!");
+        }
+
+        public static void RequestDataAboutHosts(string clientID)
+        {
+            foreach (var host in hosts.Values.Where(h => h.IsVisible))
+            {
+                host.HostWriter.Write((byte)NetMessageType.DataHosts);
+                host.HostWriter.Write(clientID);
             }
         }
 
-        protected internal static void RequestDataAboutHosts(string clientID)
-        {
-            lock (locker)
-            {
-                foreach (var host in hosts.Values.Where(h => h.IsVisible))
-                {
-                    host.HostWriter.Write((byte)NetMessageType.DataHosts);
-                    host.HostWriter.Write(clientID);
-                }
-            }
-        }
-
-        protected internal void DisconnectHosts()
+        public void DisconnectHosts()
         {
             tcpListenerHosts.Stop();
 
@@ -90,6 +74,18 @@ namespace MainServer
                 host.CloseHost();
 
             Environment.Exit(0);
+        }
+
+        private static ConcurrentDictionary<string, HostServer> hosts = new ConcurrentDictionary<string, HostServer>();
+        private static ConcurrentStack<int> ports = new ConcurrentStack<int>();
+        private TcpListener tcpListenerHosts;
+
+        private void CreatePorts()
+        {
+            for (int i = 111; i < 888; i++)
+            {
+                ports.Push(i);
+            }
         }
     }
 }

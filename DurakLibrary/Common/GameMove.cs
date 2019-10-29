@@ -6,8 +6,6 @@ namespace DurakLibrary.Common
 {
     public struct GameMove
     {
-        private Player player;
-        private Card move;
         public Player Player { get => player; }
         public Card Move { get => move; }
 
@@ -29,24 +27,6 @@ namespace DurakLibrary.Common
             }
         }
 
-        public static GameMove DecodeFromClient(BinaryReader writer, Dictionary<int, Player> players)
-        {
-            var result = new GameMove();
-            var playerID = writer.ReadInt32();
-            result.player = players[playerID];
-            var hasCardValue = writer.ReadBoolean();
-
-            if (hasCardValue)
-            {
-                var moveValue = writer.ReadByte();
-                var moveSuit = writer.ReadByte();
-                result.move = new Card((CardValue)moveValue, (CardSuit)moveSuit);
-                result.move.FaceUp = true;
-            }
-
-            return result;
-        }
-
         public static GameMove Decode(BinaryReader reader, Dictionary<int, Player> players)
         {
             var result = new GameMove();
@@ -65,5 +45,8 @@ namespace DurakLibrary.Common
 
             return result;
         }
+
+        private Player player;
+        private Card move;
     }
 }

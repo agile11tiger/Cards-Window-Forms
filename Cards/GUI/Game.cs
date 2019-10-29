@@ -16,30 +16,6 @@ namespace DurakGame
 {
     public partial class Game : Form
     {
-        private struct PlayerUITag
-        {
-            public BorderPanel Panel;
-            public Label Win;
-            public Label Name;
-            public Label PlayerID;
-            public Label CardCount;
-            public PictureBox Card;
-            public PictureBox MutedPlayer;
-            public PictureBox SwordShieldDagger;
-            public PictureBox BotGame;
-            public PictureBox Digress;
-            public PictureBox Leave;
-            public RadioButton RadioButton;
-            public Button Kick;
-        }
-
-        private CoreDurakGame core;
-        private LobbyClient lobbyClient;
-        private SingleClientServer singleServer;
-        private Dictionary<Player, PlayerUITag> playerUIs;
-        private List<RadioButton> radioButtons;
-        private bool isMicroActivated;
-
         public Game()
         {
             InitializeComponent();
@@ -176,6 +152,33 @@ namespace DurakGame
                 ?.ForEach(p => PlayerDigressed(p.Key, p.Value.IsBot, p.Value.IsDigress));
         }
 
+        public void AddSingleClientEvents(SingleClientServer singleServer)
+        {
+            this.singleServer = singleServer;
+            singleServer.OnAddedCard += PlayerCardCountChanged;
+            singleServer.OnRemovedCard += PlayerCardCountChanged;
+        }
+
+        public void AddMultiClientEvents(LobbyClient lobbyClient)
+        {
+            this.lobbyClient = lobbyClient;
+            lobbyClient.OnPlayerChatGame += ReceivedChat;
+            lobbyClient.OnPlayerCardCountChanged += PlayerCardCountChanged;
+            lobbyClient.OnInvalidMove += InvalidMove;
+            lobbyClient.OnPlayerKicked += DetermineKickButtons;
+            lobbyClient.OnPlayerDigressed += PlayerDigressed;
+            lobbyClient.OnPlayerDisconnectedGame += PlayerLeaved;
+            lobbyClient.OnReturnToLobby += RemoveMultiClientEvents;
+            lobbyClient.OnGameClose += Close;
+        }
+
+        private CoreDurakGame core;
+        private LobbyClient lobbyClient;
+        private SingleClientServer singleServer;
+        private Dictionary<Player, PlayerUITag> playerUIs;
+        private List<RadioButton> radioButtons;
+        private bool isMicroActivated;
+
         private void AddEvents()
         {
             AddCardEvents();
@@ -284,26 +287,6 @@ namespace DurakGame
                 }
             });
             core.GameState.AddStateChangedEvent(Names.IS_GAME_OVER, GameOver);
-        }
-
-        public void AddSingleClientEvents(SingleClientServer singleServer)
-        {
-            this.singleServer = singleServer;
-            singleServer.OnAddedCard += PlayerCardCountChanged;
-            singleServer.OnRemovedCard += PlayerCardCountChanged;
-        }
-
-        public void AddMultiClientEvents(LobbyClient lobbyClient)
-        {
-            this.lobbyClient = lobbyClient;
-            lobbyClient.OnPlayerChatGame += ReceivedChat;
-            lobbyClient.OnPlayerCardCountChanged += PlayerCardCountChanged;
-            lobbyClient.OnInvalidMove += InvalidMove;
-            lobbyClient.OnPlayerKicked += DetermineKickButtons;
-            lobbyClient.OnPlayerDigressed += PlayerDigressed;
-            lobbyClient.OnPlayerDisconnectedGame += PlayerLeaved;
-            lobbyClient.OnReturnToLobby += RemoveMultiClientEvents;
-            lobbyClient.OnGameClose += Close;
         }
 
         private void RemoveDesignerEvents()
@@ -593,6 +576,23 @@ namespace DurakGame
         {
             foreach (var tag in playerUIs.Values)
                 tag.PlayerID.Visible = !tag.PlayerID.Visible;
+        }
+
+        private struct PlayerUITag
+        {
+            public BorderPanel Panel;
+            public Label Win;
+            public Label Name;
+            public Label PlayerID;
+            public Label CardCount;
+            public PictureBox Card;
+            public PictureBox MutedPlayer;
+            public PictureBox SwordShieldDagger;
+            public PictureBox BotGame;
+            public PictureBox Digress;
+            public PictureBox Leave;
+            public RadioButton RadioButton;
+            public Button Kick;
         }
     }
 }

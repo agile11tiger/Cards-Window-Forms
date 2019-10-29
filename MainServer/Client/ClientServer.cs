@@ -5,14 +5,9 @@ using System.Net.Sockets;
 
 namespace MainServer
 {
-    public class ClientServer
+    internal class ClientServer
     {
-        private TcpClient client;
-        private readonly string clientID;
-        private NetworkStream clientStream;
-        private MainClientServer mainClientServer;
-        protected internal BinaryReader ClientReader { get; private set; }
-        protected internal BinaryWriter ClientWriter { get; private set; }
+        public BinaryWriter ClientWriter { get; private set; }
 
         public ClientServer(TcpClient tcpClient, MainClientServer mainClientServer)
         {
@@ -22,10 +17,10 @@ namespace MainServer
             mainClientServer.AddConnectionClient(clientID, this);
         }
 
-        protected internal void HandlingMessagesClient()
+        public void HandlingMessagesClient()
         {
             clientStream = client.GetStream();
-            ClientReader = new BinaryReader(clientStream);
+            clientReader = new BinaryReader(clientStream);
             ClientWriter = new BinaryWriter(clientStream);
             var block = true;
 
@@ -33,7 +28,7 @@ namespace MainServer
             {
                 try
                 {
-                    var netMessageType = (NetMessageType)ClientReader.ReadByte();
+                    var netMessageType = (NetMessageType)clientReader.ReadByte();
 
                     switch (netMessageType)
                     {
@@ -51,11 +46,17 @@ namespace MainServer
             }
         }
 
-        protected internal void CloseClient()
+        public void CloseClient()
         {
             mainClientServer.RemoveConnectionClient(clientID);
             clientStream?.Close();
             client?.Close();
         }
+
+        private TcpClient client;
+        private readonly string clientID;
+        private NetworkStream clientStream;
+        private MainClientServer mainClientServer;
+        private BinaryReader clientReader;
     }
 }

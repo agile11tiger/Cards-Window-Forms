@@ -11,12 +11,7 @@ namespace DurakLibrary.Common
 
     public class GameState
     {
-        private const string ARRAY_FORMAT = "@{0}[{1}]";
         public event EventHandler<StateParameter> OnStateChanged;
-
-        private Dictionary<string, StateParameter> parameters;
-        private Dictionary<string, StateChangedEvent> changedEvents;
-        private Dictionary<Tuple<string, object>, StateChangedEvent> stateEqualsEvents;
         public bool SilentSets { get; set; }
 
         public GameState()
@@ -119,16 +114,6 @@ namespace DurakLibrary.Common
             return parameters[name];
         }
 
-        private void InternalSet<T>(string name, T value, bool serverSide)
-        {
-            if (!parameters.ContainsKey(name))
-                parameters.Add(name, StateParameter.Construct(name, value, !serverSide));
-            else
-                parameters[name].SetValueInternal(value);
-
-            InvokeUpdated(parameters[name]);
-        }
-
         public void UpdateParam(StateParameter parameter)
         {
             if (parameters.ContainsKey(parameter.Name))
@@ -154,28 +139,6 @@ namespace DurakLibrary.Common
                 throw new ArgumentException("Type " + typeof(T) + " is not a supported type");
 
             InternalSet(string.Format(ARRAY_FORMAT, name, index), value, serverSide);
-        }
-
-        private T GetValueInternal<T>(string name, bool serverSide = false)
-        {
-            if (parameters.ContainsKey(name))
-            {
-                object value = parameters[name].RawValue;
-
-                if (value == null)
-                    return default(T);
-                else if (typeof(T).IsAssignableFrom(value.GetType()))
-                    return (T)value;
-                else if (Utils.CanChangeType(value, typeof(T)))
-                    return (T)Convert.ChangeType(value, typeof(T));
-                else
-                    throw new InvalidCastException(string.Format("Cannot cast {0} to {1}", value.GetType().Name, typeof(T).Name));
-            }
-            else
-            {
-                parameters.Add(name, StateParameter.Construct(name, default(T), !serverSide));
-                return parameters[name].GetValueInternal<T>();
-            }
         }
 
         public byte GetValueByte(string name) => GetValueInternal<byte>(name);
@@ -264,6 +227,43 @@ namespace DurakLibrary.Common
 
                 if (key != null && stateParameter.RawValue.Equals(key.Item2))
                     stateEqualsEvents[key](this, stateParameter);
+            }
+        }
+
+        private const string ARRAY_FORMAT = "@{0}[{1}]";
+        private Dictionary<string, StateParameter> parameters;
+        private Dictionary<string, StateChangedEvent> changedEvents;
+        private Dictionary<Tuple<string, object>, StateChangedEvent> stateEqualsEvents;
+
+        private void InternalSet<T>(string name, T value, bool serverSide)
+        {
+            if (!parameters.ContainsKey(name))
+                parameters.Add(name, StateParameter.Construct(name, value, !serverSide));
+            else
+                parameters[name].SetValueInternal(value);
+
+            InvokeUpdated(parameters[name]);
+        }
+
+        private T GetValueInternal<T>(string name, bool serverSide = false)
+        {
+            if (parameters.ContainsKey(name))
+            {
+                object value = parameters[name].RawValue;
+
+                if (value == null)
+                    return default(T);
+                else if (typeof(T).IsAssignableFrom(value.GetType()))
+                    return (T)value;
+                else if (Utils.CanChangeType(value, typeof(T)))
+                    return (T)Convert.ChangeType(value, typeof(T));
+                else
+                    throw new InvalidCastException(string.Format("Cannot cast {0} to {1}", value.GetType().Name, typeof(T).Name));
+            }
+            else
+            {
+                parameters.Add(name, StateParameter.Construct(name, default(T), !serverSide));
+                return parameters[name].GetValueInternal<T>();
             }
         }
     }

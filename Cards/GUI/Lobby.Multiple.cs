@@ -11,11 +11,6 @@ namespace DurakGame
 {
     partial class Lobby
     {
-        private MainPlayerServer gameServer;
-        private LobbyClient lobbyClient;
-        private BrowserClient browserClient;
-        private LobbyClient client;
-        
         public void InitMultiplayer()
         {
             gameServer = new MainPlayerServer(Properties.Settings.Default.DefaultMaxPlayers);
@@ -31,6 +26,34 @@ namespace DurakGame
             AddEvents();
             CreateVoiceChat();
         }
+
+        public void InitMultiplayer(BrowserClient browserClient)
+        {
+            this.browserClient = browserClient;
+            client = browserClient;
+            AddEvents();
+            CreateVoiceChat();
+        }
+
+        public void SetReadiness(int id, bool isReady)
+        {
+            views.First(v => v.Player.ID == id).SetReadiness(isReady);
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+
+            if (client != null)
+                client.IsLobbyClosing = true;
+
+            gameServer?.DisconnectPlayers();
+        }
+
+        private MainPlayerServer gameServer;
+        private LobbyClient lobbyClient;
+        private BrowserClient browserClient;
+        private LobbyClient client;
 
         private void CreateConnectedServer(CoreDurakGame core)
         {
@@ -67,19 +90,6 @@ namespace DurakGame
         private void CreateVoiceChat()
         {
             client.Chat = new VoiceChat(client.ConnectedServer.IPAddress, client.ConnectedServer.Port);
-        }
-
-        public void InitMultiplayer(BrowserClient browserClient)
-        {
-            this.browserClient = browserClient;
-            client = browserClient;
-            AddEvents();
-            CreateVoiceChat();
-        }
-        
-        public void SetReadiness(int id, bool isReady)
-        {
-            views.First(v => v.Player.ID == id).SetReadiness(isReady);
         }
 
         private void AddChatMessage(int id, string message)
@@ -152,16 +162,6 @@ namespace DurakGame
                 MessageBox.Show(reason, "Alert", MessageBoxButtons.OK);
 
             Close();
-        }
-
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            base.OnClosing(e);
-
-            if (client != null)
-                client.IsLobbyClosing = true;
-
-            gameServer?.DisconnectPlayers();
         }
     }
 }

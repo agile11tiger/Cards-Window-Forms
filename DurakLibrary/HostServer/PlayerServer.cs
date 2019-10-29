@@ -13,16 +13,7 @@ namespace DurakLibrary.HostServer
     public class PlayerServer
     {
         public static readonly Mutex Mutex = new Mutex();
-        private readonly Dictionary<MessageType, Action> messageHandlers;
-        private readonly CoreDurakGame core; //Access only through the property Core.
         public readonly int PlayerID;
-
-        private MainPlayerServer mainPlayerServer;
-        private TcpClient playerTcp;
-        private Stream playerStreamReader;
-        private Stream playerStreamWriter;
-        private BinaryReader playerReader;
-        private BinaryWriter playerWriter;
 
         public bool IsException { get; set; }
         public bool IsPlayerRemoved { get; set; }
@@ -45,19 +36,6 @@ namespace DurakLibrary.HostServer
                 core = new CoreDurakGame();
                 Core.GameState.OnStateChanged += MyGameStateOnStateChanged;
             }
-        }
-
-        private Dictionary<MessageType, Action> InitMessageHandlers()
-        {
-            return new Dictionary<MessageType, Action>
-            {
-                { MessageType.PlayerIsReady, HandlePlayerReadiness },
-                { MessageType.PlayerChat, HandlePlayerChat },
-                { MessageType.RequestState, HandleStateRequest },
-                { MessageType.HostReqStart, HandleHostReqStart },
-                { MessageType.SendMove, HandleGameMove },
-                { MessageType.PlayerDigressed, HandlePlayerDigressed }
-            };
         }
 
         public void HandlingMessagesPlayer()
@@ -139,24 +117,26 @@ namespace DurakLibrary.HostServer
             playerWriter.Write(isBot);
         }
 
-        private void HandleRemovingPlayer(int id)
+        private readonly Dictionary<MessageType, Action> messageHandlers;
+        private readonly CoreDurakGame core; //Access only through the property Core.
+        private MainPlayerServer mainPlayerServer;
+        private TcpClient playerTcp;
+        private Stream playerStreamReader;
+        private Stream playerStreamWriter;
+        private BinaryReader playerReader;
+        private BinaryWriter playerWriter;
+
+        private Dictionary<MessageType, Action> InitMessageHandlers()
         {
-            if (MainPlayerServer.PlayerServers.ContainsKey(id) && !MainPlayerServer.PlayerServers[id].IsPlayerRemoved)
+            return new Dictionary<MessageType, Action>
             {
-                mainPlayerServer.MakePlayerEternalBot(id);
-                RunOrStopBots();
-
-                if (Players.ContainsKey(id))
-                    Players[id].IsBot = true;
-            }
-        }
-
-        private void HandleMessage()
-        {
-            var messageType = (MessageType)playerReader.ReadByte();
-
-            if (messageHandlers.ContainsKey(messageType))
-                messageHandlers[messageType].Invoke();
+                { MessageType.PlayerIsReady, HandlePlayerReadiness },
+                { MessageType.PlayerChat, HandlePlayerChat },
+                { MessageType.RequestState, HandleStateRequest },
+                { MessageType.HostReqStart, HandleHostReqStart },
+                { MessageType.SendMove, HandleGameMove },
+                { MessageType.PlayerDigressed, HandlePlayerDigressed }
+            };
         }
 
         private void SendWelcomePackage()
@@ -167,6 +147,14 @@ namespace DurakLibrary.HostServer
 
             foreach (var player in Players.Values)
                 Core.ConnectedServer.WriteDataPlayer(playerWriter, player);
+        }
+
+        private void HandleMessage()
+        {
+            var messageType = (MessageType)playerReader.ReadByte();
+
+            if (messageHandlers.ContainsKey(messageType))
+                messageHandlers[messageType].Invoke();
         }
 
         private void AddPlayer()
@@ -190,6 +178,18 @@ namespace DurakLibrary.HostServer
             {
                 var id = playerReader.ReadInt32();
                 HandleRemovingPlayer(id);
+            }
+        }
+
+        private void HandleRemovingPlayer(int id)
+        {
+            if (MainPlayerServer.PlayerServers.ContainsKey(id) && !MainPlayerServer.PlayerServers[id].IsPlayerRemoved)
+            {
+                mainPlayerServer.MakePlayerEternalBot(id);
+                RunOrStopBots();
+
+                if (Players.ContainsKey(id))
+                    Players[id].IsBot = true;
             }
         }
 
@@ -407,7 +407,7 @@ namespace DurakLibrary.HostServer
 
         private void HandleGameMove()
         {
-            var move = GameMove.DecodeFromClient(playerReader, Players);
+            var move = GameMove.Decode(playerReader, Players);
 
             if (Core.ConnectedServer.State == ServerState.InGame && move.Player == Players[PlayerID])
                 Core.HandleMove(move, playerWriter);

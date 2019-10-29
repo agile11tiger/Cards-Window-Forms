@@ -15,14 +15,40 @@ namespace DurakLibrary.Clients
         public event Action OnBrowserClose;
         public bool IsBrowserClosing;
 
+        public BrowserClient(Player player) : base(player)
+        {
+        }
+
+        public void SetBrowserTcp(IPAddress ip, int port)
+        {
+            browserTcp = new TcpClient();
+            browserTcp.Connect(ip, port);
+
+            RunBrowserClient();
+            CheckConnection(ref browserWriter);
+        }
+
+        public void RequestDataAboutHosts()
+        {
+            browserWriter.Write((byte)NetMessageType.DataHosts);
+        }
+
+        public void CloseBrowser(object state)
+        {
+            if (!IsBrowserClosing)
+                OnBrowserClose.Invoke();
+
+            if (browserStream != null)
+                browserStream.Close();
+
+            if (browserTcp != null)
+                browserTcp.Close();
+        }
+
         private TcpClient browserTcp;
         private NetworkStream browserStream;
         private BinaryReader browserReader;
         private BinaryWriter browserWriter;
-
-        public BrowserClient(Player player) : base(player)
-        {
-        }
 
         private async void RunBrowserClient()
         {
@@ -60,37 +86,11 @@ namespace DurakLibrary.Clients
                 }
             }
         }
-
-        public void CloseBrowser(object state)
-        {
-            if (!IsBrowserClosing)
-                OnBrowserClose.Invoke();
-
-            if (browserStream != null)
-                browserStream.Close();
-
-            if (browserTcp != null)
-                browserTcp.Close();
-        }
-
-        public void RequestDataAboutHosts()
-        {
-            browserWriter.Write((byte)NetMessageType.DataHosts);
-        }
-
         private void ReceivedDataAboutHosts(object obj)
         {
             var serverTag = new ServerTag();
             serverTag.ReadFromPacket(browserReader);
             OnHostDiscovered.Invoke(serverTag);
-        }
-        
-        public void SetBrowserTcp(IPAddress ip, int port)
-        {
-            browserTcp = new TcpClient();
-            browserTcp.Connect(ip, port);
-            RunBrowserClient();
-            CheckConnection(ref browserWriter);
         }
     }
 }

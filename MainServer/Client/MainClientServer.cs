@@ -7,28 +7,8 @@ using System.Threading.Tasks;
 
 namespace MainServer
 {
-    public class MainClientServer
+    internal class MainClientServer
     {
-        private static ConcurrentDictionary<string, ClientServer> clients = new ConcurrentDictionary<string, ClientServer>();
-        private static object locker = new object();
-        private TcpListener tcpListenerClients;
-        
-        protected internal void AddConnectionClient(string id, ClientServer clientServer)
-        {
-            if (clients.TryAdd(id, clientServer))
-                Console.WriteLine($"Client-Server is connected: ID = {id}");
-            else
-                Console.WriteLine($"Client-Server with such ID = {id} is already connected!");
-        }
-
-        protected internal void RemoveConnectionClient(string id)
-        {
-            if (clients.TryRemove(id, out _))
-                Console.WriteLine($"Client-Server is deleted: ID = {id}");
-            else
-                Console.WriteLine($"Client-Server with such ID = {id} doesn`t exist!");
-        }
-
         public void GettingClients()
         {
             try
@@ -52,24 +32,40 @@ namespace MainServer
             }
         }
 
-        protected internal static void SendDataAboutHost(ServerTag serverTag)
+        public void AddConnectionClient(string id, ClientServer clientServer)
         {
-            lock (locker)
-            {
-                var client = clients[serverTag.SenderID];
-                client.ClientWriter.Write((byte)NetMessageType.DataHosts);
-                serverTag.WriteToPacket(client.ClientWriter, serverTag.SenderID);
-            }
+            if (clients.TryAdd(id, clientServer))
+                Console.WriteLine($"Client-Server is connected: ID = {id}");
+            else
+                Console.WriteLine($"Client-Server with such ID = {id} is already connected!");
         }
-        
-        protected internal void DisconnectClients()
+
+        public void RemoveConnectionClient(string id)
+        {
+            if (clients.TryRemove(id, out _))
+                Console.WriteLine($"Client-Server is deleted: ID = {id}");
+            else
+                Console.WriteLine($"Client-Server with such ID = {id} doesn`t exist!");
+        }
+
+        public static void SendDataAboutHost(ServerTag serverTag)
+        {
+            var client = clients[serverTag.SenderID];
+            client.ClientWriter.Write((byte)NetMessageType.DataHosts);
+            serverTag.WriteToPacket(client.ClientWriter, serverTag.SenderID);
+        }
+
+        public void DisconnectClients()
         {
             tcpListenerClients.Stop();
 
-            foreach(var client in clients.Values)
+            foreach (var client in clients.Values)
                 client.CloseClient();
-            
+
             Environment.Exit(0);
         }
+
+        private static ConcurrentDictionary<string, ClientServer> clients = new ConcurrentDictionary<string, ClientServer>();
+        private TcpListener tcpListenerClients;
     }
 }

@@ -5,9 +5,6 @@ namespace MainServer
 {
     class Program
     {
-        private static MainHostServer serverHosts;
-        private static MainClientServer serverClients;
-
         static void Main(string[] args)
         {
             try
@@ -31,5 +28,8 @@ namespace MainServer
                 Console.WriteLine(ex.Message);
             }
         }
+
+        private static MainHostServer serverHosts;
+        private static MainClientServer serverClients;
     }
 }

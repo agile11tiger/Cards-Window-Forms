@@ -206,7 +206,6 @@
             // cbxDefence
             // 
             this.cbxDefence.BackColor = System.Drawing.Color.Transparent;
-            card1.AlternateValue = null;
             card1.CardValue = 1;
             card1.FaceUp = true;
             card1.Suit = DurakLibrary.Cards.CardSuit.Hearts;
@@ -224,7 +223,6 @@
             // cbxPlayerAttack
             // 
             this.cbxPlayerAttack.BackColor = System.Drawing.Color.Transparent;
-            card2.AlternateValue = null;
             card2.CardValue = 1;
             card2.FaceUp = true;
             card2.Suit = DurakLibrary.Cards.CardSuit.Spades;
@@ -253,7 +251,6 @@
             // cbxDefence1
             // 
             this.cbxDefence1.BackColor = System.Drawing.Color.Transparent;
-            card3.AlternateValue = null;
             card3.CardValue = 1;
             card3.FaceUp = true;
             card3.Suit = DurakLibrary.Cards.CardSuit.Hearts;
@@ -271,7 +268,6 @@
             // cbxPlayerAttack1
             // 
             this.cbxPlayerAttack1.BackColor = System.Drawing.Color.Transparent;
-            card4.AlternateValue = null;
             card4.CardValue = 1;
             card4.FaceUp = true;
             card4.Suit = DurakLibrary.Cards.CardSuit.Spades;
@@ -300,7 +296,6 @@
             // cbxDefence2
             // 
             this.cbxDefence2.BackColor = System.Drawing.Color.Transparent;
-            card5.AlternateValue = null;
             card5.CardValue = 1;
             card5.FaceUp = true;
             card5.Suit = DurakLibrary.Cards.CardSuit.Hearts;
@@ -318,7 +313,6 @@
             // cbxPlayerAttack2
             // 
             this.cbxPlayerAttack2.BackColor = System.Drawing.Color.Transparent;
-            card6.AlternateValue = null;
             card6.CardValue = 1;
             card6.FaceUp = true;
             card6.Suit = DurakLibrary.Cards.CardSuit.Spades;
@@ -347,7 +341,6 @@
             // cbxDefence3
             // 
             this.cbxDefence3.BackColor = System.Drawing.Color.Transparent;
-            card7.AlternateValue = null;
             card7.CardValue = 1;
             card7.FaceUp = true;
             card7.Suit = DurakLibrary.Cards.CardSuit.Hearts;
@@ -365,7 +358,6 @@
             // cbxPlayerAttack3
             // 
             this.cbxPlayerAttack3.BackColor = System.Drawing.Color.Transparent;
-            card8.AlternateValue = null;
             card8.CardValue = 1;
             card8.FaceUp = true;
             card8.Suit = DurakLibrary.Cards.CardSuit.Spades;
@@ -394,7 +386,6 @@
             // cbxDefence4
             // 
             this.cbxDefence4.BackColor = System.Drawing.Color.Transparent;
-            card9.AlternateValue = null;
             card9.CardValue = 1;
             card9.FaceUp = true;
             card9.Suit = DurakLibrary.Cards.CardSuit.Hearts;
@@ -412,7 +403,6 @@
             // cbxPlayerAttack4
             // 
             this.cbxPlayerAttack4.BackColor = System.Drawing.Color.Transparent;
-            card10.AlternateValue = null;
             card10.CardValue = 1;
             card10.FaceUp = true;
             card10.Suit = DurakLibrary.Cards.CardSuit.Spades;
@@ -441,7 +431,6 @@
             // cbxDefence5
             // 
             this.cbxDefence5.BackColor = System.Drawing.Color.Transparent;
-            card11.AlternateValue = null;
             card11.CardValue = 1;
             card11.FaceUp = true;
             card11.Suit = DurakLibrary.Cards.CardSuit.Hearts;
@@ -459,7 +448,6 @@
             // cbxPlayerAttack5
             // 
             this.cbxPlayerAttack5.BackColor = System.Drawing.Color.Transparent;
-            card12.AlternateValue = null;
             card12.CardValue = 1;
             card12.FaceUp = true;
             card12.Suit = DurakLibrary.Cards.CardSuit.Spades;
@@ -931,7 +919,6 @@
             // cbxDeck
             // 
             this.cbxDeck.BackColor = System.Drawing.Color.Transparent;
-            card13.AlternateValue = null;
             card13.CardValue = 1;
             card13.FaceUp = false;
             card13.Suit = DurakLibrary.Cards.CardSuit.Hearts;
@@ -949,7 +936,6 @@
             // cbxTrump
             // 
             this.cbxTrump.BackColor = System.Drawing.Color.Transparent;
-            card14.AlternateValue = null;
             card14.CardValue = 1;
             card14.FaceUp = false;
             card14.Suit = DurakLibrary.Cards.CardSuit.Hearts;
