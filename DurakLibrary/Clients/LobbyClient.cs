@@ -58,7 +58,12 @@ namespace DurakLibrary.Clients
         {
             lobbyTcp = new TcpClient();
             lobbyTcp.Connect(ip, port);
-            RunLobbyClient();
+        }
+
+        public async void RunLobbyClient()
+        {
+            var guiContext = SynchronizationContext.Current;
+            await Task.Factory.StartNew(() => HandlingMessagesLobby(guiContext), TaskCreationOptions.LongRunning);
         }
 
         public void ConnectHost()
@@ -72,6 +77,7 @@ namespace DurakLibrary.Clients
             if (ConnectedServer == null)
             {
                 SetLobbyTcp(PlayerUntill.IPAddress, host.Port);
+                RunLobbyClient();
                 CheckConnection(ref lobbyWriter);
 
                 try
@@ -212,12 +218,6 @@ namespace DurakLibrary.Clients
         private NetworkStream lobbyStream;
         private BinaryReader lobbyReader;
         private BinaryWriter lobbyWriter;
-
-        private async void RunLobbyClient()
-        {
-            var guiContext = SynchronizationContext.Current;
-            await Task.Factory.StartNew(() => HandlingMessagesLobby(guiContext), TaskCreationOptions.LongRunning);
-        }
 
         private void HandlingMessagesLobby(SynchronizationContext guiContext)
         {

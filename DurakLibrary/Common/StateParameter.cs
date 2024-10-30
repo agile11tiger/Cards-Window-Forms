@@ -43,9 +43,12 @@ namespace DurakLibrary.Common
 
         internal T GetValueInternal<T>()
         {
-            if (value == null) return default(T);
-            else if (value is T) return (T)value;
-            else throw new InvalidCastException(string.Format("Cannot cast {0} to {1}", value.GetType().Name, typeof(T).Name));
+            if (value == null)
+                return default(T);
+            else if (value is T) 
+                return (T)value;
+            else 
+                throw new InvalidCastException(string.Format("Cannot cast {0} to {1}", value.GetType().Name, typeof(T).Name));
         }
 
         public byte GetValueByte() => GetValueInternal<byte>();
@@ -115,14 +118,16 @@ namespace DurakLibrary.Common
 
                         if (value != null)
                         {
-                            writer.Write((byte)(value as Card).Value);
-                            writer.Write((byte)(value as Card).Suit);
+                            var card = value as Card;
+                            writer.Write((byte)card.Value);
+                            writer.Write((byte)card.Suit);
                         }
                         break;
                     case Type.CardCollection:
-                        writer.Write((value as CardCollection).Count);
+                        var cardCollection = value as CardCollection;
+                        writer.Write(cardCollection.Count);
 
-                        foreach (var card in value as CardCollection)
+                        foreach (var card in cardCollection)
                         {
                             writer.Write(card != null);
 
@@ -134,21 +139,23 @@ namespace DurakLibrary.Common
                         }
                         break;
                     case Type.ListInt:
-                        writer.Write((value as List<int>).Count);
+                        var list = value as List<int>;
+                        writer.Write(list.Count);
 
-                        foreach (int? number in value as List<int>)
+                        foreach (int? number in list)
                         {
                             writer.Write(number != null);
 
                             if (number != null)
-                                writer.Write((byte)number);
+                                writer.Write((int)number);
 
                         }
                         break;
                     case Type.DictIntBool:
-                        writer.Write((value as Dictionary<int, bool>).Count);
+                        var dict = value as Dictionary<int, bool>;
+                        writer.Write(dict.Count);
 
-                        foreach (var pair in value as Dictionary<int, bool>)
+                        foreach (var pair in dict)
                         {
                             writer.Write(pair.Key);
                             writer.Write(pair.Value);
@@ -252,7 +259,8 @@ namespace DurakLibrary.Common
                     break;
                 case Type.Card:
                     if (clientReader.ReadBoolean())
-                        value = new Card((CardValue)clientReader.ReadByte(), (CardSuit)clientReader.ReadByte()) { FaceUp = true };
+                        value = new Card((CardValue)clientReader.ReadByte(), (CardSuit)clientReader.ReadByte())
+                        { FaceUp = true };
                     else
                         value = null;
                     break;
@@ -265,7 +273,8 @@ namespace DurakLibrary.Common
                         var hasValue = clientReader.ReadBoolean();
 
                         if (hasValue)
-                            resultCollection.Add(new Card((CardValue)clientReader.ReadByte(), (CardSuit)clientReader.ReadByte()) { FaceUp = true });
+                            resultCollection.Add(new Card((CardValue)clientReader.ReadByte(), (CardSuit)clientReader.ReadByte()) 
+                            { FaceUp = true });
                     }
 
                     value = resultCollection;
@@ -279,7 +288,7 @@ namespace DurakLibrary.Common
                         var hasValue = clientReader.ReadBoolean();
 
                         if (hasValue)
-                            list.Add((int)clientReader.ReadByte());
+                            list.Add(clientReader.ReadInt32());
                     }
 
                     value = list;

@@ -23,13 +23,17 @@ namespace DurakLibrary.Clients
         {
             browserTcp = new TcpClient();
             browserTcp.Connect(ip, port);
+        }
 
-            RunBrowserClient();
-            CheckConnection(ref browserWriter);
+        public async void RunBrowserClient()
+        {
+            var guiContext = SynchronizationContext.Current;
+            await Task.Factory.StartNew(() => HandlingMessagesBrowser(guiContext), TaskCreationOptions.LongRunning);
         }
 
         public void RequestDataAboutHosts()
         {
+            CheckConnection(ref browserWriter);
             browserWriter.Write((byte)NetMessageType.DataHosts);
         }
 
@@ -49,12 +53,6 @@ namespace DurakLibrary.Clients
         private NetworkStream browserStream;
         private BinaryReader browserReader;
         private BinaryWriter browserWriter;
-
-        private async void RunBrowserClient()
-        {
-            var guiContext = SynchronizationContext.Current;
-            await Task.Factory.StartNew(() => HandlingMessagesBrowser(guiContext), TaskCreationOptions.LongRunning);
-        }
 
         private void HandlingMessagesBrowser(SynchronizationContext guiContext)
         {
@@ -86,6 +84,7 @@ namespace DurakLibrary.Clients
                 }
             }
         }
+
         private void ReceivedDataAboutHosts(object obj)
         {
             var serverTag = new ServerTag();

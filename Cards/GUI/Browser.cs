@@ -45,6 +45,7 @@ namespace DurakGame
             var player = new Player(Properties.Settings.Default.UserName) { IPAddress = NetUtils.GetAddress() };
             browserClient = new BrowserClient(player);
             browserClient.SetBrowserTcp(player.IPAddress, NetSettings.PORT_FOR_CLIENTS);
+            browserClient.RunBrowserClient();
 
             AddEvents();
             browserClient.RequestDataAboutHosts();

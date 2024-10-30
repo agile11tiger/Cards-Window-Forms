@@ -74,6 +74,7 @@ namespace DurakGame
             var player = new Player(Properties.Settings.Default.UserName, START_ID, true, true) { IPAddress = NetUtils.GetAddress() };
             lobbyClient = new LobbyClient(player);
             lobbyClient.SetLobbyTcp(player.IPAddress, gameServer.Port);
+            lobbyClient.RunLobbyClient();
         }
 
         private void AddEvents()

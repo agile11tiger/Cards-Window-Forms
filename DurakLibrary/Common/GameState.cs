@@ -192,13 +192,6 @@ namespace DurakLibrary.Common
                 StateParameter.Decode(reader, this);
         }
 
-        public static GameState CreateDecode(BinaryReader clientReader)
-        {
-            var result = new GameState();
-            result.Decode(clientReader);
-            return result;
-        }
-
         public void UpdateParameters()
         {
             StateParameter[] toTransfer = parameters.Values.Where(x => x.IsSynced).ToArray();
